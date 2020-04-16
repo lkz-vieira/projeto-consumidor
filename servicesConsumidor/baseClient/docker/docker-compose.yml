@@ -1,0 +1,35 @@
+version: "3.2"
+services:
+  nodeClient:
+    image: node:alpine
+    working_dir: /usr/app
+    container_name: webClient
+    volumes:
+      - ../web/:/usr/app/
+    ports:
+      - 3000:3000
+    command: sh -c "npm install && npm run start"
+    networks:
+      consumidor_net:
+        ipv4_address: 172.25.0.2
+  mysqlClient:
+    container_name: dbClient
+    image: mysql:5.7
+    ports:
+      - "3308:3306"
+    volumes:
+      - ../database/data:/var/lib/mysql
+      - ../database/db/dump.sql:/docker-entrypoint-initdb.d/dump.sql
+    environment:
+      - MYSQL_ROOT_PASSWORD=my@S3cr3t
+      - MYSQL_DATABASE=dbClient
+    networks:
+      consumidor_net:
+        ipv4_address: 172.25.0.3
+
+networks:
+  consumidor_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/24

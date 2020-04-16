@@ -1,0 +1,46 @@
+version: "3"
+services:
+  nodeTracking:
+    container_name: webTracking
+    image: node:alpine
+    working_dir: /usr/app
+    volumes:
+      - ../web/:/usr/app/
+    ports:
+      - 3004:3004
+    command: sh -c "npm install && npm run start"
+    networks:
+      consumidor_net:
+        ipv4_address: 172.25.0.9
+
+  mongoTracking:
+    image: mongo:latest
+    container_name: dbTracking
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=dbTracking
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=myP4ssw0rd
+    volumes:
+      - ../database/mongodb/data/:/data/db
+      - ../database/config/mongo.js:/docker-entrypoint-initdb.d/mongo.js
+    networks:
+      consumidor_net:
+        ipv4_address: 172.25.0.8
+
+  redisTracking:
+    container_name: redisTracking
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      consumidor_net:
+        ipv4_address: 172.25.0.7
+
+networks:
+  consumidor_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/24
